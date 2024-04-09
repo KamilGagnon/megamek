@@ -3,10 +3,11 @@ package megamek.server.utils;
 import megamek.common.Game;
 import megamek.common.Report;
 import megamek.common.enums.GamePhase;
+import megamek.common.event.GameVictoryEvent;
 import megamek.server.GameManager;
 
-public class EndGameUtils {
-    public static void changeToPhaseEnd(Game game, GameManager gm) {
+public interface IEndGameUtils {
+    static void changeToPhaseEnd(Game game, GameManager gm) {
         // remove any entities that died in the heat/end phase before
         // checking for victory
         gm.resetEntityPhase(GamePhase.END);
@@ -32,5 +33,21 @@ public class EndGameUtils {
         // Decrement the ASEWAffected counter
         gm.decrementASEWTurns();
     }
-    void changeToPhaseVictory(Game game, GameManager gm);
+
+    static void changeToPhaseEndReport(Game game, GameManager gm) {
+        if (gm.changePlayersTeam) {
+            gm.processTeamChangeRequest();
+        }
+        if (gm.victory()) {
+            gm.changePhase(GamePhase.VICTORY);
+        } else {
+            gm.changePhase(GamePhase.INITIATIVE);
+        }
+    }
+    static void changeToPhaseVictory(Game game, GameManager gm){
+        GameVictoryEvent gve = new GameVictoryEvent(gm, game);
+        game.processGameEvent(gve);
+        gm.transmitGameVictoryEventToAll();
+        gm.resetGame();
+    }
 }
