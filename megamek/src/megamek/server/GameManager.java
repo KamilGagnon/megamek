@@ -95,7 +95,11 @@ public class GameManager implements IGameManager {
 
     private Game game = new Game();
 
-    public Vector<Report> vPhaseReport = new Vector<>();
+    private Vector<Report> vPhaseReport = new Vector<>();
+
+    public Vector<Report> getVPhaseReport(){
+        return vPhaseReport;
+    }
 
     public Vector<Report> getvPhaseReport() {
         return vPhaseReport;
