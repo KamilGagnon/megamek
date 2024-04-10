@@ -6,6 +6,7 @@ import megamek.common.Report;
 import megamek.common.enums.GamePhase;
 import megamek.common.event.GameVictoryEvent;
 import megamek.server.GameManager;
+import megamek.server.victory.VictoryResult;
 
 public interface IEndGameUtils {
 
@@ -57,6 +58,10 @@ public interface IEndGameUtils {
 
     static void changeEloRatingOfPlayers(Game game, GameManager gm){
         //get the winner
+        VictoryResult victoryResult = game.getVictoryResult();
+        if(victoryResult == null){
+            return;
+        }
         int winner = game.getVictoryResult().getWinningPlayer();
         //turn that int into a player
         Player winnerPlayer = game.getPlayer(winner);
