@@ -37,7 +37,7 @@ public final class Player extends TurnOrdered implements IPlayerWithRating  {
     //region Variable Declarations
     private static final long serialVersionUID = 6828849559007455761L;
 
-    private int eloRating = 0;
+    private float eloRating = 0;
 
     public static final int PLAYER_NONE = -1;
     public static final int TEAM_NONE = 0;
@@ -702,12 +702,12 @@ public final class Player extends TurnOrdered implements IPlayerWithRating  {
     }
 
     @Override
-    public int getEloRating() {
+    public float getEloRating() {
         return eloRating;
     }
 
     @Override
-    public int modifyEloRating(int delta) {
+    public float modifyEloRating(float delta) {
         return eloRating += delta;
     }
 

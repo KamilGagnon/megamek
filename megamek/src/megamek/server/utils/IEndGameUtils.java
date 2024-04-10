@@ -1,12 +1,15 @@
 package megamek.server.utils;
 
 import megamek.common.Game;
+import megamek.common.Player;
 import megamek.common.Report;
 import megamek.common.enums.GamePhase;
 import megamek.common.event.GameVictoryEvent;
 import megamek.server.GameManager;
 
 public interface IEndGameUtils {
+
+    final float ELO_GAIN = 10.0f;
     static void changeToPhaseEnd(Game game, GameManager gm) {
         // remove any entities that died in the heat/end phase before
         // checking for victory
@@ -46,8 +49,32 @@ public interface IEndGameUtils {
     }
     static void changeToPhaseVictory(Game game, GameManager gm){
         GameVictoryEvent gve = new GameVictoryEvent(gm, game);
+        changeEloRatingOfPlayers(game, gm);
         game.processGameEvent(gve);
         gm.transmitGameVictoryEventToAll();
         gm.resetGame();
+    }
+
+    static void changeEloRatingOfPlayers(Game game, GameManager gm){
+        //get the winner
+        int winner = game.getVictoryResult().getWinningPlayer();
+        //turn that int into a player
+        Player winnerPlayer = game.getPlayer(winner);
+        //modify winnerPlayer
+        winnerPlayer.modifyEloRating(ELO_GAIN);
+        // get all the losers
+        float eloLoss = calculateLosingEloLoss(game);
+        for (Player player : game.getPlayersList()) {
+            if (player != winnerPlayer) {
+                player.modifyEloRating(eloLoss);
+            }
+        }
+    }
+
+    static float calculateLosingEloLoss(Game game){
+        //get number of players
+        int numPlayers = game.getPlayersList().isEmpty() ? 1 : game.getPlayersList().size();
+        //calculate elo loss
+        return - ELO_GAIN / (numPlayers);
     }
 }
