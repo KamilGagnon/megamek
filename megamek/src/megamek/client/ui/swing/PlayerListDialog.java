@@ -127,6 +127,9 @@ public class PlayerListDialog extends JDialog implements ActionListener, IPrefer
                 playerDisplay.append(Messages.getString("PlayerListDialog.player_gm"));
             }
 
+            // display the player's elo rating
+            playerDisplay.append("Elo rating: " + player.getEloRating());
+
             if (player.isGhost()) {
                 playerDisplay.append(Messages.getString("PlayerListDialog.player_ghost"));
             } else {

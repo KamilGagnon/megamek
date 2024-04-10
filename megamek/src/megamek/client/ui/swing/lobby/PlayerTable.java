@@ -244,6 +244,13 @@ class PlayerTable extends JTable {
             result.append((player.getBV() != 0) ? formatter.format(player.getBV()) : "--");
             result.append("</FONT>");
 
+            //append the players elo rating\
+            String msg_elo = " ELO";
+            result.append(msg_elo + ": ");
+            //turn elo rating into a string
+            result.append(player.getEloRating());
+
+
             // Initiative Mod
             if (player.getConstantInitBonus() != 0) {
                 result.append(UIUtil.DOT_SPACER);
