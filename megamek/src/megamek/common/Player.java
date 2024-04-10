@@ -32,10 +32,12 @@ import java.util.Vector;
  * Note that Player should be usable for any type of game (TW, AS, BF, SBF) and therefore should not
  * make any direct use of Game, Entity, AlphaStrikeElement etc., instead using IGame and InGameObject if necessary.
  */
-public final class Player extends TurnOrdered {
+public final class Player extends TurnOrdered implements IPlayerWithRating  {
 
     //region Variable Declarations
     private static final long serialVersionUID = 6828849559007455761L;
+
+    private float eloRating = 0;
 
     public static final int PLAYER_NONE = -1;
     public static final int TEAM_NONE = 0;
@@ -697,5 +699,20 @@ public final class Player extends TurnOrdered {
         copy.admitsDefeat = admitsDefeat;
 
         return copy;
+    }
+
+    @Override
+    public float getEloRating() {
+        return eloRating;
+    }
+
+    @Override
+    public float modifyEloRating(float delta) {
+        return eloRating += delta;
+    }
+
+    @Override
+    public void resetEloRating() {
+        eloRating = 0;
     }
 }

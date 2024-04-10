@@ -45,6 +45,7 @@ import megamek.common.verifier.*;
 import megamek.common.weapons.*;
 import megamek.common.weapons.infantry.InfantryWeapon;
 import megamek.server.commands.*;
+import megamek.server.utils.IEndGameUtils;
 import megamek.server.victory.VictoryResult;
 import org.apache.logging.log4j.LogManager;
 
@@ -96,6 +97,10 @@ public class GameManager implements IGameManager {
 
     private Vector<Report> vPhaseReport = new Vector<>();
 
+    public Vector<Report> getVPhaseReport(){
+        return vPhaseReport;
+    }
+
     public Vector<Report> getvPhaseReport() {
         return vPhaseReport;
     }
@@ -132,7 +137,7 @@ public class GameManager implements IGameManager {
      * Flag that is set to true when all players have voted to allow another
      * player to change teams.
      */
-    private boolean changePlayersTeam = false;
+    public boolean changePlayersTeam = false;
 
     /**
      * Keeps track of which player made a request to become Game Master.
@@ -356,7 +361,7 @@ public class GameManager implements IGameManager {
         return requestedTeam;
     }
 
-    private void processTeamChangeRequest() {
+    public void processTeamChangeRequest() {
         if (playerChangingTeam != null) {
             playerChangingTeam.setTeam(requestedTeam);
             getGame().setupTeams();
@@ -1009,7 +1014,7 @@ public class GameManager implements IGameManager {
      * Called at the beginning of each phase. Sets and resets any entity
      * parameters that need to be reset.
      */
-    private void resetEntityPhase(GamePhase phase) {
+    public void resetEntityPhase(GamePhase phase) {
         // first, mark doomed entities as destroyed and flag them
         Vector<Entity> toRemove = new Vector<>(0, 10);
 
@@ -1591,7 +1596,7 @@ public class GameManager implements IGameManager {
      *
      * @param phase the <code>int</code> id of the phase to change to
      */
-    private void changePhase(GamePhase phase) {
+    public void changePhase(GamePhase phase) {
         game.setLastPhase(game.getPhase());
         game.setPhase(phase);
 
@@ -2532,47 +2537,13 @@ public class GameManager implements IGameManager {
                 changePhase(GamePhase.PREMOVEMENT);
                 break;
             case END:
-                // remove any entities that died in the heat/end phase before
-                // checking for victory
-                resetEntityPhase(GamePhase.END);
-                boolean victory = victory(); // note this may add reports
-                // check phase report
-                // HACK: hardcoded message ID check
-                if ((vPhaseReport.size() > 3) || ((vPhaseReport.size() > 1)
-                        && (vPhaseReport.elementAt(1).messageId != 1205))) {
-                    game.addReports(vPhaseReport);
-                    changePhase(GamePhase.END_REPORT);
-                } else {
-                    // just the heat and end headers, so we'll add
-                    // the <nothing> label
-                    addReport(new Report(1205, Report.PUBLIC));
-                    game.addReports(vPhaseReport);
-                    sendReport();
-                    if (victory) {
-                        changePhase(GamePhase.VICTORY);
-                    } else {
-                        changePhase(GamePhase.INITIATIVE);
-                    }
-                }
-                // Decrement the ASEWAffected counter
-                decrementASEWTurns();
-
+                IEndGameUtils.changeToPhaseEnd(game, this);
                 break;
             case END_REPORT:
-                if (changePlayersTeam) {
-                    processTeamChangeRequest();
-                }
-                if (victory()) {
-                    changePhase(GamePhase.VICTORY);
-                } else {
-                    changePhase(GamePhase.INITIATIVE);
-                }
+                IEndGameUtils.changeToPhaseEndReport(game, this);
                 break;
             case VICTORY:
-                GameVictoryEvent gve = new GameVictoryEvent(this, game);
-                game.processGameEvent(gve);
-                transmitGameVictoryEventToAll();
-                resetGame();
+                IEndGameUtils.changeToPhaseVictory(game, this);
                 break;
             default:
                 break;
@@ -30373,7 +30344,7 @@ public class GameManager implements IGameManager {
     /**
      * Sends out the game victory event to all connections
      */
-    private void transmitGameVictoryEventToAll() {
+    public void transmitGameVictoryEventToAll() {
         send(new Packet(PacketCommand.GAME_VICTORY_EVENT));
     }
 
@@ -30736,7 +30707,7 @@ public class GameManager implements IGameManager {
         send(new Packet(PacketCommand.ENTITY_NOVA_NETWORK_CHANGE, id, net));
     }
 
-    private void sendReport() {
+    public void sendReport() {
         sendReport(false);
     }
 
